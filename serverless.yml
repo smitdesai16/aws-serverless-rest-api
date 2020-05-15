@@ -1,4 +1,5 @@
 service: serverless-rest-api
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -6,6 +7,18 @@ provider:
   region: us-east-1
   memorySize: 128
   timeout: 5
+  environment:
+    DYNAMODB_TABLE: 'notes'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 functions:
   hello:
     handler: handler.hello
@@ -13,10 +26,35 @@ functions:
       - http:
           path: hello/get
           method: get
+
+resources:
+  Resources:
+    NotesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain # this means the table will stay on aws regardless if we delete this service
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+
 plugins:
   - serverless-dynamodb-local
   - serverless-offline
+
 custom:
   dynamodb:
     stages:
       - dev
+    start:
+      port: 8000
+      inMemory: true # dynamodb will run in memory and won't take up any storage
+      migrate: true # create the table when running the app

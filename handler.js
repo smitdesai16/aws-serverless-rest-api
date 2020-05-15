@@ -1,5 +1,13 @@
 'use strict';
 
+const uuid = require('uuid');
+const AWS = require('aws-sdk');
+
+const dynamoDb = new AWS.DynamoDB.DocumentClient({
+	region: 'localhost',
+	endpoint: 'http://localhost:8000'
+});
+
 module.exports.hello = async event => {
   return {
     statusCode: 200,
