@@ -4,8 +4,8 @@ const uuid = require('uuid');
 const AWS = require('aws-sdk');
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({
-  region: 'localhost',
-  endpoint: 'http://localhost:8000'
+//   region: 'localhost',
+//   endpoint: 'http://localhost:8000'
 }); // remove when deploying!
 
 module.exports.create = async event => {
