@@ -8,8 +8,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient({
   endpoint: 'http://localhost:8000'
 }); // remove when deploying!
 
-module.exports.create = (event, context, callback) => {
-  // create a note and put it in the database
+module.exports.create = async event => {
   const data = JSON.parse(event.body);
 
   const params = {
@@ -20,24 +19,31 @@ module.exports.create = (event, context, callback) => {
     }
   }
 
-  dynamoDb.put(params, (error) => {
-
-    if (error) {
-      console.error(error);
-      return callback(null, {
-        statusCode: error.statusCode || 500,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Could not create the note.'
-      });
-    }
-
-    const response = {
+  try {
+    await dynamoDb.put(params).promise();
+    return {
       statusCode: 200,
-      body: JSON.stringify(params.Item)
+      body: JSON.stringify(
+        {
+          message: 'Create the note.'
+        },
+        null,
+        2
+      ),
     };
-    callback(null, response);
-  });
-}
+  } catch (error) {
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify(
+        {
+          message: 'Could not create the note.'
+        },
+        null,
+        2
+      ),
+    };
+  }
+};
 
 module.exports.getOne = (event, context, callback) => {
   const params = {
