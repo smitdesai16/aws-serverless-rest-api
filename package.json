@@ -9,6 +9,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.39",
     "serverless-offline": "^6.1.5"
+  },
+  "dependencies": {
+    "uuid": "^8.0.0"
   }
 }

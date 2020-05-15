@@ -2,6 +2,8 @@ service: serverless-rest-api
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
   memorySize: 128
   timeout: 5
 functions:
@@ -12,4 +14,9 @@ functions:
           path: hello/get
           method: get
 plugins:
+  - serverless-dynamodb-local
   - serverless-offline
+custom:
+  dynamodb:
+    stages:
+      - dev
