@@ -1,0 +1,15 @@
+service: serverless-rest-api
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 128
+  timeout: 5
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello/get
+          method: get
+plugins:
+  - serverless-offline
