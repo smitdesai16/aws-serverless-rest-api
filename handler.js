@@ -25,13 +25,14 @@ module.exports.create = async event => {
       statusCode: 200,
       body: JSON.stringify(
         {
-          message: 'Create the note.'
+          message: params.Item
         },
         null,
         2
       ),
     };
   } catch (error) {
+    console.error(error);
     return {
       statusCode: error.statusCode || 500,
       body: JSON.stringify(
@@ -45,7 +46,7 @@ module.exports.create = async event => {
   }
 };
 
-module.exports.getOne = (event, context, callback) => {
+module.exports.getOne = async event => {
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
     Key: {
@@ -53,51 +54,67 @@ module.exports.getOne = (event, context, callback) => {
     }
   };
 
-  dynamoDb.get(params, (error, result) => {
-
-    if (error) {
-      console.error(error);
-      return callback(null, {
-        statusCode: error.statusCode || 500,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Could not fetch the note.'
-      });
-    }
-
-    const response = {
+  try {
+    const response = await dynamoDb.get(params).promise();
+    return {
       statusCode: 200,
-      body: JSON.stringify(result.Item)
+      body: JSON.stringify(
+        {
+          message: response
+        },
+        null,
+        2
+      ),
     };
-    callback(null, response);
-  });
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify(
+        {
+          message: 'Error in getting note'
+        },
+        null,
+        2
+      ),
+    };
+  }
 };
 
-module.exports.getAll = (event, context, callback) => {
+module.exports.getAll = async event => {
   
   const params = {
     TableName: process.env.DYNAMODB_TABLE
   };
 
-  dynamoDb.scan(params, (error, result) => {
-
-    if (error) {
-      console.error(error);
-      return callback(null, {
-        statusCode: error.statusCode || 500,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Could not fetch the note.'
-      });
-    }
-
-    const response = {
+  try {
+    const response = await dynamoDb.scan(params).promise();
+    return {
       statusCode: 200,
-      body: JSON.stringify(result.Items)
-    }
-    callback(null, response);
-  });
+      body: JSON.stringify(
+        {
+          message: response
+        },
+        null,
+        2
+      ),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify(
+        {
+          message: 'Error in getting note'
+        },
+        null,
+        2
+      ),
+    };
+  }
 };
 
-module.exports.update = (event, context, callback) => {
+module.exports.update = async event => {
   const data = JSON.parse(event.body);
 
   const params = {
@@ -115,26 +132,34 @@ module.exports.update = (event, context, callback) => {
     ReturnValues: 'ALL_NEW'
   };
 
-  dynamoDb.update(params, (error, result) => {
-
-    if (error) {
-      console.error(error);
-      return callback(null, {
-        statusCode: error.statusCode || 500,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Could not update the note.'
-      });
-    }
-
-    const response = {
+  try {
+    await dynamoDb.update(params).promise();
+    return {
       statusCode: 200,
-      body: JSON.stringify(result.Attributes)
+      body: JSON.stringify(
+        {
+          message: 'Note updated'
+        },
+        null,
+        2
+      ),
     };
-    callback(null, response);
-  });
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify(
+        {
+          message: 'Error in getting note'
+        },
+        null,
+        2
+      ),
+    };
+  }
 };
 
-module.exports.delete = (event, context, callback) => {
+module.exports.delete = async event => {
   
   const params = {
     TableName: process.env.DYNAMODB_TABLE,
@@ -143,23 +168,30 @@ module.exports.delete = (event, context, callback) => {
     }
   };
 
-  dynamoDb.delete(params, (error) => {
-
-    if (error) {
-      console.error(error);
-      return callback(null, {
-        statusCode: error.statusCode || 500,
-        headers: { 'Content-Type': 'text/plain' },
-        body: 'Could not delete the note.'
-      });
-    }
-
-    const response = {
+  try {
+    await dynamoDb.delete(params).promise();
+    return {
       statusCode: 200,
-      body: JSON.stringify('Removed the note with id: ' + event.pathParameters.id)
+      body: JSON.stringify(
+        {
+          message: 'Note deleted'
+        },
+        null,
+        2
+      ),
     };
-    callback(null, response);
-
-  });
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: error.statusCode || 500,
+      body: JSON.stringify(
+        {
+          message: 'Error in delete note'
+        },
+        null,
+        2
+      ),
+    };
+  }
 
 };
